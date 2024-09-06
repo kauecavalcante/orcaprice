@@ -1,3 +1,23 @@
+# projeto-engenharia
+ Projeto de engenharia de software
+
+Projeto: Orcaprice
+Descrição: Criar um aplicativo que crie, edite e remova seus orcamentos de projetos. 
+
+Equipe:
+ - <a href="https://github.com/kauecavalcante" a>Kauê Cavalcante<a/>
+ - <a href="https://github.com/pedroteixeira02" a>Pedro Teixeira<a/>
+ - <a href="https://github.com/JoaoPedro-09" a>Jõao Pedro<a/>
+- <a href="https://github.com/marjufeitosa" a>Maju Feitosa<a/>
+- <a href="https://github.com/BieldoPry" a>Gabriel Rabello<a/>
+
+
+
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
