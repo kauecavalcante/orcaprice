@@ -1,20 +1,55 @@
 {
-    "projects": [],
-    "categories": [{
-        "id": 1,
-        "name": "Infra"
-    },
+  "projects": [
     {
-        "id": 2,
+      "id": "c7b7",
+      "name": "teste de desenvolvimento ",
+      "budget": "5000",
+      "category": {
+        "id": "2",
         "name": "Desenvolvimento"
+      },
+      "orcaprice": 0,
+      "services": []
     },
     {
-        "id": 3,
-        "name": "Design"
+      "id": "9125",
+      "name": "teste",
+      "budget": "123",
+      "category": {
+        "id": "2",
+        "name": "Desenvolvimento"
+      },
+      "orcaprice": 0,
+      "services": []
     },
     {
-        "id": 4,
-        "name": "Planejamento"
-    }]
-    
+      "id": "c57f",
+      "name": "teste",
+      "budget": "5000",
+      "category": {
+        "id": "2",
+        "name": "Desenvolvimento"
+      },
+      "orcaprice": 0,
+      "services": []
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Infra"
+    },
+    {
+      "id": "2",
+      "name": "Desenvolvimento"
+    },
+    {
+      "id": "3",
+      "name": "Design"
+    },
+    {
+      "id": "4",
+      "name": "Planejamento"
+    }
+  ]
 }
