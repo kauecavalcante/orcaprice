@@ -23,7 +23,7 @@ function NewProject() {
             }
             return resp.json();
         })
-        .then((e) => navigate("/projects")) // Redireciona para "/projects" após o POST
+        .then((e) => navigate("/projects", { state: { message: 'Projeto criado com sucesso!' } }))  // Redireciona para "/projects" após o POST
         .catch((err) => console.log(err));
     }
 
