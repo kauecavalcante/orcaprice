@@ -1,5 +1,17 @@
 {
-  "projects": [],
+  "projects": [
+    {
+      "id": "08b5",
+      "name": "teste",
+      "budget": "5",
+      "category": {
+        "id": "4",
+        "name": "Planejamento"
+      },
+      "orcaprice": 0,
+      "services": []
+    }
+  ],
   "categories": [
     {
       "id": "1",
