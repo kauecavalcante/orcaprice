@@ -1,50 +1,5 @@
 {
-  "projects": [
-    {
-      "id": "fd5f",
-      "name": "teste",
-      "budget": "5000",
-      "category": {
-        "id": "1",
-        "name": "Infra"
-      },
-      "orcaprice": 0,
-      "services": []
-    },
-    {
-      "id": "4d9d",
-      "name": "teste 2",
-      "budget": "300",
-      "category": {
-        "id": "4",
-        "name": "Planejamento"
-      },
-      "orcaprice": 0,
-      "services": []
-    },
-    {
-      "id": "7faa",
-      "name": "teste 3",
-      "budget": "55000",
-      "category": {
-        "id": "3",
-        "name": "Design"
-      },
-      "orcaprice": 0,
-      "services": []
-    },
-    {
-      "id": "1407",
-      "name": "teste",
-      "budget": "2000",
-      "category": {
-        "id": "2",
-        "name": "Desenvolvimento"
-      },
-      "orcaprice": 0,
-      "services": []
-    }
-  ],
+  "projects": [],
   "categories": [
     {
       "id": "1",

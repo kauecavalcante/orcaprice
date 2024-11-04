@@ -13,6 +13,7 @@ import { useState, useEffect } from "react"
 function Projects() {
     const [projects, setProjects] = useState([]) // criando um state para salvar os projetos. começando em um array vazio
     const [removeLoading, setRemoveLoading] = useState(false)
+    const [projectMessage, setProjectMessage] = useState('')
 
     const location = useLocation()
     let message = ''
@@ -34,9 +35,25 @@ function Projects() {
                     setRemoveLoading(true)
                 })
                 .catch((err) => console.log(err))
-            }, 3000) //  3 segundos 
+            }, 300) //  3 segundos 
 
     }, [])
+
+    function removeProject(id){
+        fetch(`http://localhost:3001/projects/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(resp => resp.json())
+        .then(data => {
+            setProjects(projects.filter((project) => project.id !== id))
+            // Mensagem 
+            setProjectMessage('Projeto removido com sucesso!')
+        })
+        .catch(err => console.log(err))
+    }
+
 
     return (
         <div className={styles.project_container}>
@@ -45,10 +62,11 @@ function Projects() {
                  <LinkButton to='/newproject' text="Criar Projeto" />
             </div>
             {message && <Message type='success' msg={message} />}
+            {projectMessage && <Message type='success' msg={projectMessage} />}
             <Container customClass='start'>
                 {projects.length > 0 && 
                   projects.map((project) => 
-                    <ProjectCard id={project.id} name={project.name} budget={project.budget} category={project.category.name}  key={project.id} />
+                    <ProjectCard id={project.id} name={project.name} budget={project.budget} category={project.category.name}  key={project.id} handleRemove={removeProject}/>
                   )
                 }
                 {!removeLoading && <Loading/>}
