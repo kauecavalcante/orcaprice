@@ -1,81 +1,91 @@
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getAuth } from "firebase/auth";
+import { db } from "../../firebaseConfig";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 
+import Message from "../layout/Message";
+import Container from "../layout/Container";
+import Loading from "../layout/loading";
+import LinkButton from "../layout/LinkButton";
+import ProjectCard from "../project/ProjectCard";
 
-import Message from "../layout/Message"
-import Container from '../layout/Container'
-import Loading from "../layout/loading"
-import LinkButton from "../layout/LinkButton"
-import ProjectCard from "../project/ProjectCard"
-
-import styles from './Projects.module.css'
-import { useState, useEffect } from "react"
+import styles from "./Projects.module.css";
 
 function Projects() {
-    const [projects, setProjects] = useState([]) // criando um state para salvar os projetos. começando em um array vazio
-    const [removeLoading, setRemoveLoading] = useState(false)
-    const [projectMessage, setProjectMessage] = useState('')
+    const [projects, setProjects] = useState([]);
+    const [removeLoading, setRemoveLoading] = useState(false);
+    const [projectMessage, setProjectMessage] = useState("");
 
-    const location = useLocation()
-    let message = ''
-    if(location.state){
-        message = location.state.message
+    const location = useLocation();
+    let message = "";
+    if (location.state) {
+        message = location.state.message;
     }
 
     useEffect(() => {
-        setTimeout( // setTimeout de proposito para mostrar a funcao do loading...
-            () => {
-                fetch('http://localhost:3001/projects', {
-                    method: 'GET', 
-                    headers: { 
-                        'Content-Type': 'application/json',
-                    },
-                }).then(resp => resp.json())
-                .then(data => {
-                    setProjects(data)
-                    setRemoveLoading(true)
-                })
-                .catch((err) => console.log(err))
-            }, 300) //  3 segundos 
+        const fetchProjects = async () => {
+            const auth = getAuth();
+            const user = auth.currentUser;
 
-    }, [])
+            if (user) {
+                const projectsCollection = collection(db, "projects");
+                const q = query(projectsCollection, where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
 
-    function removeProject(id){
-        fetch(`http://localhost:3001/projects/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }).then(resp => resp.json())
-        .then(data => {
-            setProjects(projects.filter((project) => project.id !== id))
-            // Mensagem 
-            setProjectMessage('Projeto removido com sucesso!')
-        })
-        .catch(err => console.log(err))
+                const userProjects = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                setProjects(userProjects);
+            } else {
+                console.error("Usuário não autenticado");
+            }
+
+            setRemoveLoading(true);
+        };
+
+        fetchProjects();
+    }, []);
+
+    async function removeProject(id) {
+        try {
+            await deleteDoc(doc(db, "projects", id));
+            setProjects(projects.filter((project) => project.id !== id));
+            setProjectMessage("Projeto removido com sucesso!");
+        } catch (error) {
+            console.error("Erro ao remover projeto:", error);
+        }
     }
-
 
     return (
         <div className={styles.project_container}>
             <div className={styles.title_container}>
-                 <h1>Meus projetos</h1>
-                 <LinkButton to='/newproject' text="Criar Projeto" />
+                <h1>Meus projetos</h1>
+                <LinkButton to="/newproject" text="Criar Projeto" />
             </div>
-            {message && <Message type='success' msg={message} />}
-            {projectMessage && <Message type='success' msg={projectMessage} />}
-            <Container customClass='start'>
-                {projects.length > 0 && 
-                  projects.map((project) => 
-                    <ProjectCard id={project.id} name={project.name} budget={project.budget} category={project.category.name}  key={project.id} handleRemove={removeProject}/>
-                  )
-                }
-                {!removeLoading && <Loading/>}
+            {message && <Message type="success" msg={message} />}
+            {projectMessage && <Message type="success" msg={projectMessage} />}
+            <Container customClass="start">
+                {projects.length > 0 &&
+                    projects.map((project) => (
+                        <ProjectCard
+                            id={project.id}
+                            name={project.name}
+                            budget={project.budget}
+                            category={project.category.name}
+                            key={project.id}
+                            handleRemove={removeProject}
+                        />
+                    ))}
+                {!removeLoading && <Loading />}
                 {removeLoading && projects.length === 0 && (
                     <p>Não há projetos cadastrados!</p>
                 )}
             </Container>
-        </div> 
-    )
+        </div>
+    );
 }
 
-export default Projects
+export default Projects;

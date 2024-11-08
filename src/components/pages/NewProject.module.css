@@ -1,13 +1,29 @@
-.newproject_container{
-    width: 450px;
+.newproject_container {
+    width: 100%;
+    max-width: 450px; /* Limita a largura máxima a 450px */
     margin: 0 auto;
     padding: 3em;
 }
 
-.newproject_container h1{
+.newproject_container h1 {
     margin-bottom: 0.5em;
 }
 
-.newproject_container p{
+.newproject_container p {
     color: #7b7b7b;
+}
+
+/* Media query para telas menores, como dispositivos móveis */
+@media (max-width: 450px) {
+    .newproject_container {
+        padding: 2em 1em; /* Reduz o padding para telas menores */
+    }
+
+    .newproject_container h1 {
+        font-size: 1.5em; /* Ajusta o tamanho do título para telas menores */
+    }
+
+    .newproject_container p {
+        font-size: 0.9em; /* Ajusta o tamanho do texto para telas menores */
+    }
 }

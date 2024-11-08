@@ -1,10 +1,42 @@
-.project_container{
+.project_container {
     padding: 2em;
-   
 }
 
-.title_container{
+.title_container {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 2em;
+    flex-wrap: wrap; /* Permite que o conteúdo se ajuste em telas pequenas */
+}
+
+.title_container h1 {
+    flex: 1;
+    margin: 0;
+}
+
+.title_container a {
+    margin-top: 1em;
+}
+
+/* Media query para telas menores */
+@media (max-width: 768px) {
+    .project_container {
+        padding: 1em; /* Reduz o padding em telas menores */
+    }
+
+    .title_container {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: center;
+    }
+
+    .title_container h1 {
+        margin-bottom: 0.5em;
+    }
+
+    .title_container a {
+        width: 100%;
+        text-align: center;
+    }
 }

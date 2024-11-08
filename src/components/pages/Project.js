@@ -1,142 +1,140 @@
-import {  v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
+import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { db } from '../../firebaseConfig';
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
-import { useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import styles from './Project.module.css';
 
-import styles from './Project.module.css'
-
-import Loading from '../layout/loading'
-import Container from '../layout/Container'
-import ProjectForm from '../project/ProjectForm'
-import Message from '../layout/Message'
-import ServiceForm from '../service/ServiceForm'
-import ServiceCard from '../service/ServiceCard'
+import Loading from '../layout/loading';
+import Container from '../layout/Container';
+import ProjectForm from '../project/ProjectForm';
+import Message from '../layout/Message';
+import ServiceForm from '../service/ServiceForm';
+import ServiceCard from '../service/ServiceCard';
 
 function Project() {
-  let { id } = useParams()
-  const [project, setProject] = useState([])
-  const [showProjectForm, setShowProjectForm] = useState(false)
-  const [showServiceForm, setShowServiceForm] = useState(false)
-  const [services, setServices] = useState([])
-  const [message, setMessage] = useState('')
-  const [type, setType] = useState('success')
+  let { id } = useParams();
+  const [project, setProject] = useState(null);
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showServiceForm, setShowServiceForm] = useState(false);
+  const [services, setServices] = useState([]);
+  const [message, setMessage] = useState('');
+  const [type, setType] = useState('success');
 
   useEffect(() => {
-    // Para ver o loading
-    setTimeout(
-      () =>
-        fetch(`http://localhost:3001/projects/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((resp) => resp.json())
-          .then((data) => {
-            setProject(data)
-            setServices(data.services)
-          }),
-      0,
-    )
-  }, [id])
+    const fetchProject = async () => {
+      try {
+        const docRef = doc(db, "projects", id);
+        const docSnap = await getDoc(docRef);
 
-  function editPost(project) {
-    // budget validation
-    if (project.budget < project.orcaprice) {
-      setMessage('O Orçamento não pode ser menor que o custo do projeto!')
-      setType('error')
-      return false
+        if (docSnap.exists()) {
+          const projectData = docSnap.data();
+          setProject(projectData);
+          setServices(projectData.services || []);
+        } else {
+          console.error("Projeto não encontrado!");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar o projeto:", error);
+      }
+    };
+
+    fetchProject();
+  }, [id]);
+
+  async function editPost(updatedProject) {
+    if (updatedProject.budget < updatedProject.orcaprice) {
+      setMessage('O Orçamento não pode ser menor que o custo do projeto!');
+      setType('error');
+      return false;
     }
 
-    fetch(`http://localhost:3001/projects/${project.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(project),
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProject(data)
-        setShowProjectForm(!showProjectForm)
-        setMessage('Projeto atualizado!')
-        setType('success')
-      })
+    try {
+      const docRef = doc(db, "projects", id);
+      await updateDoc(docRef, updatedProject);
+      setProject(updatedProject);
+      setShowProjectForm(!showProjectForm);
+      setMessage('Projeto atualizado!');
+      setType('success');
+    } catch (error) {
+      console.error("Erro ao atualizar o projeto:", error);
+    }
   }
 
-  function createService(project) {
-    // last service
-    const lastService = project.services[project.services.length - 1]
+  async function createService(updatedProject) {
+    const newService = { ...updatedProject.services[updatedProject.services.length - 1], id: uuidv4() };
+    const newCost = parseFloat(updatedProject.orcaprice) + parseFloat(newService.orcaprice);
 
-    lastService.id = uuidv4()
-
-    const lastServiceCost = lastService.orcaprice
-
-    const newCost = parseFloat(project.orcaprice) + parseFloat(lastServiceCost)
-
-    // maximum value validation
-    if (newCost > parseFloat(project.budget)) {
-      setMessage('Orçamento ultrapassado, verifique o valor do serviço!')
-      setType('error')
-      project.services.pop()
-      return false
+    if (newCost > parseFloat(updatedProject.budget)) {
+      setMessage('Orçamento ultrapassado, verifique o valor do serviço!');
+      setType('error');
+      updatedProject.services.pop();
+      return;
     }
 
-   
-    project.orcaprice = newCost
+    updatedProject.orcaprice = newCost;
+    updatedProject.services = [...services, newService]; // Adiciona o novo serviço à lista de serviços
 
-    fetch(`http://localhost:3001/projects/${project.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(project),
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setServices(data.services)
-        setShowServiceForm(!showServiceForm)
-        setMessage('Serviço adicionado!')
-        setType('success')
-      })
+    try {
+      const docRef = doc(db, "projects", id);
+      await updateDoc(docRef, {
+        services: updatedProject.services,
+        orcaprice: updatedProject.orcaprice,
+      });
+
+      setProject(updatedProject);
+      setServices(updatedProject.services);
+      setShowServiceForm(false);
+      setMessage('Serviço adicionado!');
+      setType('success');
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
+    }
   }
 
-  function removeService(id, orcaprice) {
-    const servicesUpdated = project.services.filter(
-      (service) => service.id !== id,
-    )
+  async function removeService(serviceId, serviceCost) {
+    // Filtra para criar uma nova lista de serviços, excluindo o serviço especificado
+    const updatedServices = project.services.filter((service) => service.id !== serviceId);
+    
+    // Atualiza o custo total do projeto
+    const updatedProject = {
+        ...project,
+        services: updatedServices,
+        orcaprice: project.orcaprice - serviceCost,
+    };
 
-    const projectUpdated = project
+    try {
+        const docRef = doc(db, "projects", id);
+        await updateDoc(docRef, {
+            services: updatedServices,
+            orcaprice: updatedProject.orcaprice,
+        });
 
-    projectUpdated.services = servicesUpdated
-    projectUpdated.orcaprice = parseFloat(projectUpdated.orcaprice) - parseFloat(orcaprice)
+        // Atualiza o estado local após a atualização no Firestore
+        setProject(updatedProject);
+        setServices(updatedServices);
+        setMessage('Serviço removido com sucesso!');
+        setType('success');
+    } catch (error) {
+        console.error("Erro ao remover o serviço:", error);
+        setMessage("Erro ao remover o serviço.");
+        setType("error");
+    }
+}
 
-    fetch(`http://localhost:3001/projects/${projectUpdated.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(projectUpdated),
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setProject(projectUpdated)
-        setServices(servicesUpdated)
-        setMessage('Serviço removido com sucesso!')
-      })
-  }
 
   function toggleProjectForm() {
-    setShowProjectForm(!showProjectForm)
+    setShowProjectForm(!showProjectForm);
   }
 
   function toggleServiceForm() {
-    setShowServiceForm(!showServiceForm)
+    setShowServiceForm(!showServiceForm);
   }
 
   return (
     <>
-      {project.name ? (
+      {project ? (
         <div className={styles.project_details}>
           <Container customClass="column">
             {message && <Message type={type} msg={message} />}
@@ -192,7 +190,7 @@ function Project() {
                     orcaprice={service.orcaprice}
                     description={service.description}
                     key={service.id}
-                    handleRemove={removeService}
+                    handleRemove={() => removeService(service.id, service.orcaprice)}
                   />
                 ))}
               {services.length === 0 && <p>Não há serviços cadastrados.</p>}
@@ -203,7 +201,7 @@ function Project() {
         <Loading />
       )}
     </>
-  )
+  );
 }
 
-export default Project
+export default Project;
