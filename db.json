@@ -1,17 +1,5 @@
 {
-  "projects": [
-    {
-      "id": "2251",
-      "name": "projeto atualizado!",
-      "budget": "60000",
-      "category": {
-        "id": "2",
-        "name": "Desenvolvimento"
-      },
-      "orcaprice": 0,
-      "services": []
-    }
-  ],
+  "projects": [],
   "categories": [
     {
       "id": "1",
