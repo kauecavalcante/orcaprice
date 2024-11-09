@@ -23,7 +23,7 @@ function Register() {
 
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            navigate('/'); // Redireciona para a página inicial ou outra rota desejada
+            navigate('/'); 
         } catch (err) {
             setError('Erro ao criar conta. Tente novamente.');
             console.error("Erro no cadastro:", err);
